@@ -29,10 +29,12 @@ var createInsertCommand = function (tableName, data, callback) {
 }
 
 var mapData = function (uid, data) {
-  return data.map(function (entity) {
-    entity.unshift(uid);
-    return entity;
+  let result = data.map(function (entity) {
+    let array = Object.values(entity);
+    array.unshift(uid);
+    return array;
   });
+  return result;
 }
 
 module.exports = {

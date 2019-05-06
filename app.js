@@ -3,42 +3,30 @@ var express = require('express');
 var riak = require('./riak')
 const app = express();
 const port = 8080;
-var serviceAccount = require("FirebasePrivateKey.json");
+var serviceAccount = require("./secrets/FirebasePrivateKey.json");
 
 f_admin.initializeApp({
   credential: f_admin.credential.cert(serviceAccount),
   databaseURL: "https://healthapp-9f4a5.firebaseio.com"
 });
 
-// app.post('*',function (req,res,next) {
-//   var idToken = req.get('Authorization');
-//   f_admin.auth().verifyIdToken(idToken)
-//   .then(function(decodedToken) {
-//     res.locals.uid = decodedToken.uid;
-//     next();
-//   }).catch(function(error) {
-//     res.status(401).send({errorCode:401,errorMessage:'Cannot verifyToken'})
-//   });
-// });
 app.post('*',function (req,res,next) {
-  res.locals.uid = "123";
-  next();
+  var idToken = req.get('Authorization');
+  f_admin.auth().verifyIdToken(idToken)
+  .then(function(decodedToken) {
+    res.locals.uid = decodedToken.uid;
+    next();
+  }).catch(function(error) {
+    res.status(401).send({errorCode:401,errorMessage:'Cannot verifyToken'})
+  });
 });
-missclickTestData = [
-  [1, 4.5, false],
-  [2, 4.6, false]]
-coordinatorTestData = [
-  [1, 1.1, 1.1, 1.3, 1.1, 1.1, 1.2],
-  [2, 2.1, 2.1, 2.3, 2.1, 2.1, 2.2],
-  [3, 3.1, 3.1, 3.3, 3.1, 3.1, 3.2],
-  [4, 4.1, 4.1, 4.3, 4.1, 4.1, 4.2]]
-textTestData = [
-  [1, 's', 100],
-  [2, 'ss', 200],
-  [3, 'sss', 300]]
+
+app.use(express.json());
+
+
 
 app.post('/missclick', function (req, res, next) {
-  riak.insertMissClick(res.locals.uid, missclickTestData, function (err, result) {
+  riak.insertMissClick(res.locals.uid, req.body, function (err, result) {
     if (result == true) {
       res.send('ok');
     } else {
@@ -48,7 +36,7 @@ app.post('/missclick', function (req, res, next) {
 });
 
 app.post('/coordination', function (req, res, next) {
-  riak.insertCoordination(res.locals.uid, coordinatorTestData, function (err, result) {
+  riak.insertCoordination(res.locals.uid, req.body, function (err, result) {
     if (result == true) {
       res.send('ok');
     } else {
@@ -59,7 +47,7 @@ app.post('/coordination', function (req, res, next) {
 
 
 app.post('/text', function (req, res, next) {
-  riak.insertTextWatcher(res.locals.uid, textTestData, function (err, result) {
+  riak.insertTextWatcher(res.locals.uid, req.body, function (err, result) {
     if (result == true) {
       res.send('ok');
     } else {
