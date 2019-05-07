@@ -1,7 +1,14 @@
 var riak = require('basho-riak-client');
+let address = process.env.RIAK_ADDRESS.replace(new RegExp('\'', 'g'), '')
+var isConnecting = false
+var client;
+var reconnectAttepts = process.env.RIAK_RECONECT_ATTEMPTS;
+if(isNaN(reconnectAttepts)){
+  reconnectAttepts = 4
+}
+initiateClient()
 
-var client = new riak.Client(['127.0.0.1:8087']);
-
+console.log('Reconnecting atempts number = '+reconnectAttepts);
 
 function insertMissClick(uid, missclickData, callback) {
   insert('MissClick', missclickData, uid, callback);
@@ -35,6 +42,24 @@ var mapData = function (uid, data) {
     return array;
   });
   return result;
+}
+
+function initiateClient() {
+  if (!isConnecting) {
+    console.log('Try connect to Riak')
+    isConnecting = true
+    client = new riak.Client([address], function (err, cl, cluster) {
+      isConnecting = false;
+      if (err) {
+        reconnectAttepts--
+        if (reconnectAttepts == 0) {
+          throw new Error('Exit because can not connect to riak after');
+        } else {
+          setTimeout(initiateClient, 3000);
+        }
+      }
+    });
+  }
 }
 
 module.exports = {
