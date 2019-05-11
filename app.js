@@ -10,15 +10,15 @@ f_admin.initializeApp({
   databaseURL: "https://healthapp-9f4a5.firebaseio.com"
 });
 
-app.post('*',function (req,res,next) {
+app.post('*', function (req, res, next) {
   var idToken = req.get('Authorization');
   f_admin.auth().verifyIdToken(idToken)
-  .then(function(decodedToken) {
-    res.locals.uid = decodedToken.uid;
-    next();
-  }).catch(function(error) {
-    res.status(401).send({errorCode:401,errorMessage:'Cannot verifyToken'})
-  });
+    .then(function (decodedToken) {
+      res.locals.uid = decodedToken.uid;
+      next();
+    }).catch(function (error) {
+      res.status(401).send({ errorCode: 401, errorMessage: 'Cannot verifyToken' })
+    });
 });
 
 // app.post('*',function (req,res,next) {
@@ -42,17 +42,6 @@ app.post('/missclick', function (req, res, next) {
 
 app.post('/coordination', function (req, res, next) {
   riak.insertCoordination(res.locals.uid, req.body, function (err, result) {
-    if (result == true) {
-      res.send('ok');
-    } else {
-      res.status(500).send(err);
-    }
-  })
-});
-
-
-app.post('/text', function (req, res, next) {
-  riak.insertTextWatcher(res.locals.uid, req.body, function (err, result) {
     if (result == true) {
       res.send('ok');
     } else {

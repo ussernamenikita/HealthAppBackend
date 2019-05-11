@@ -3,27 +3,24 @@ let address = process.env.RIAK_ADDRESS.replace(new RegExp('\'', 'g'), '')
 var isConnecting = false
 var client;
 var reconnectAttepts = process.env.RIAK_RECONECT_ATTEMPTS;
-if(isNaN(reconnectAttepts)){
+if (isNaN(reconnectAttepts)) {
   reconnectAttepts = 4
 }
 initiateClient()
 
-console.log('Reconnecting atempts number = '+reconnectAttepts);
+console.log('Reconnecting atempts number = ' + reconnectAttepts);
 
 function insertMissClick(uid, missclickData, callback) {
-  insert('MissClick', missclickData, uid, callback);
+  insert('MissClick', mapMissClick(missclickData, uid), callback);
 };
 
 function insertCoordination(uid, coordinationData, callback) {
-  insert('Coordination', coordinationData, uid, callback);
+  insert('Coordination', mapCoordination(coordinationData, uid), callback);
 };
 
-function insertTextWatcher(uid, textData, callback) {
-  insert('TextWatcher', textData, uid, callback);
-};
 
-function insert(tableName, data, uid, callback) {
-  let cmd = createInsertCommand(tableName, mapData(uid, data), callback);
+function insert(tableName, mappedData, callback) {
+  let cmd = createInsertCommand(tableName, mappedData, callback);
   client.execute(cmd);
 }
 
@@ -35,14 +32,28 @@ var createInsertCommand = function (tableName, data, callback) {
     .build();
 }
 
-var mapData = function (uid, data) {
-  let result = data.map(function (entity) {
-    let array = Object.values(entity);
-    array.unshift(uid);
-    return array;
-  });
+var mapMissClick = function (data, uid) {
+  result = data.map(function (item) {
+    return Array(uid, item.timestamp, item.distance, item.isMissClick)
+  })
+  console.log(result)
   return result;
 }
+
+var mapCoordination = function (data, uid) {
+  return data.map(function (item) {
+    return Array(uid,
+      item.timestamp,
+      item.pitch,
+      item.azimut,
+      item.roll,
+      item.latitude,
+      item.longitude,
+      item.altitude,
+      item.speed)
+  })
+}
+
 
 function initiateClient() {
   if (!isConnecting) {
@@ -64,6 +75,5 @@ function initiateClient() {
 
 module.exports = {
   insertMissClick: insertMissClick,
-  insertCoordination: insertCoordination,
-  insertTextWatcher: insertTextWatcher
+  insertCoordination: insertCoordination
 };
