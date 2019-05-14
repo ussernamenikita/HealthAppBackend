@@ -1,25 +1,18 @@
-var f_admin = require('firebase-admin');
 var express = require('express');
 var riak = require('./riak')
 const app = express();
 const port = 8080;
-var serviceAccount = require("./secrets/FirebasePrivateKey.json");
-
-f_admin.initializeApp({
-  credential: f_admin.credential.cert(serviceAccount),
-  databaseURL: "https://healthapp-9f4a5.firebaseio.com"
-});
 
 app.post('*', function (req, res, next) {
   var idToken = req.get('Authorization');
-  f_admin.auth().verifyIdToken(idToken)
-    .then(function (decodedToken) {
+  if(idToken == null){
+    res.status(401).send({ errorCode: 401, errorMessage: 'User without id' })
+  }else{
       res.locals.uid = decodedToken.uid;
       next();
-    }).catch(function (error) {
-      res.status(401).send({ errorCode: 401, errorMessage: 'Cannot verifyToken' })
-    });
+  }
 });
+
 
 // app.post('*',function (req,res,next) {
 //   res.locals.uid = "123";
