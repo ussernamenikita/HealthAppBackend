@@ -8,7 +8,7 @@ app.post('*', function (req, res, next) {
   if(idToken == null){
     res.status(401).send({ errorCode: 401, errorMessage: 'User without id' })
   }else{
-      res.locals.uid = decodedToken.uid;
+      res.locals.uid = idToken;
       next();
   }
 });

@@ -34,24 +34,32 @@ var createInsertCommand = function (tableName, data, callback) {
 
 var mapMissClick = function (data, uid) {
   result = data.map(function (item) {
-    return Array(uid, item.timestamp, item.distance, item.isMissClick)
+    return Array(uid, item.timestamp, map(item.distance), item.isMissClick)
   })
-  console.log(result)
   return result;
 }
 
 var mapCoordination = function (data, uid) {
-  return data.map(function (item) {
-    return Array(uid,
+  var result = data.map(function (item) {
+    return Array("123",
       item.timestamp,
-      item.pitch,
-      item.azimut,
-      item.roll,
-      item.latitude,
-      item.longitude,
-      item.altitude,
-      item.speed)
+      map(item.pitch),
+      map(item.azimut),
+      map(item.roll),
+      map(item.latitude),
+      map(item.longitude),
+      map(item.altitude),
+      map(item.speed))
   })
+  return result;
+}
+
+function map(v){
+  if(v == null){
+    return v;
+  }else{
+    return v + 0.0000001
+  }
 }
 
 
