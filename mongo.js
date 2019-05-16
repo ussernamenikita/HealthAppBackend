@@ -56,8 +56,6 @@ function toMap(data) {
   data.forEach(arrayItem => {
     delete arrayItem.id
     let key = getZeroDate(arrayItem.timestamp)
-    console.log(arrayItem.timestamp)
-    console.log(key)
     var value = map.get(key)
     if (value == undefined) {
       value = { minTime: arrayItem.timestamp, maxTime: arrayItem.timestamp, items: new Array(), day: key }
@@ -71,8 +69,10 @@ function toMap(data) {
       map.delete(key)
     }
   })
-  array.concat(map.values)
-  return array;
+  map.forEach(v=>{
+    array.push(v)
+  })
+  return array
 }
 
 
