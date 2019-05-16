@@ -1,7 +1,7 @@
 var MongoClient = require('mongodb').MongoClient;
 let address = process.env.DB_ADDRESS
 const client = new MongoClient(address, { useNewUrlParser: true });
-const CHUNK_SIZE = 5
+const CHUNK_SIZE = process.env.DB_CHUNK
 var db = null
 var missclickCollectionName = "missclick"
 var orientationCollectionName = "orientation"
