@@ -1,5 +1,6 @@
 var express = require('express');
 var riak = require('./mongo')
+var bodyParser = require('body-parser');
 const app = express();
 const port = 8080;
 
@@ -13,7 +14,8 @@ app.post('*', function (req, res, next) {
   }
 });
 
-app.use(express.json());
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 
 
@@ -46,8 +48,5 @@ app.post('/coordination', function (req, res, next) {
 });
 
 app.listen(port, function () {
-  console.log('Health app listening on port 8080!')
+  console.log('Health app listening on port '+port+ '!')
 })
-
-
-

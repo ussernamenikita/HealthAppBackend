@@ -11,8 +11,8 @@ client.connect(function (err, client) {
     throw err
   }
   db = client.db("HealthAppDatabase")
-  db.collection(missclickCollectionName).createIndex({ day: 1, user_id: "text" })
-  db.collection(orientationCollectionName).createIndex({ day: 1, user_id: "text" })
+  db.collection(missclickCollectionName).createIndex({ day: 1, user_id: "text", values_count: 1 })
+  db.collection(orientationCollectionName).createIndex({ day: 1, user_id: "text", values_count: 1 })
 })
 
 async function insertMissClick(uid, missclickData, callback) {
@@ -38,17 +38,17 @@ async function insert(collection, array, uid) {
     let day = value.day
     delete value.day
     await db.collection(collection).updateOne(
-      { user_id: uid, values_count: { $lt: CHUNK_SIZE }, day: day },
+      { user_id: uid, values_count: { $lt: Number.parseInt(CHUNK_SIZE) }, day: day },
       {
         $push: { values: { $each: value.items } },
         $min: { first: value.minTime },
         $max: { last: value.maxTime },
-        $inc: { values_count: value.items.length }
+        $inc: { values_count: value.items.length },
+        $set: { "ISODate": value.ISODate }
       },
       { upsert: true })
   });
 };
-
 
 function toMap(data) {
   var array = []
@@ -58,7 +58,7 @@ function toMap(data) {
     let key = getZeroDate(arrayItem.timestamp)
     var value = map.get(key)
     if (value == undefined) {
-      value = { minTime: arrayItem.timestamp, maxTime: arrayItem.timestamp, items: new Array(), day: key }
+      value = { minTime: arrayItem.timestamp, maxTime: arrayItem.timestamp, items: new Array(), day: key, ISODate: new Date(key), values_count: 0 }
       map.set(key, value)
     }
     value.items.push(arrayItem)
@@ -69,7 +69,7 @@ function toMap(data) {
       map.delete(key)
     }
   })
-  map.forEach(v=>{
+  map.forEach(v => {
     array.push(v)
   })
   return array
@@ -85,4 +85,4 @@ function getZeroDate(timestamp) {
 module.exports = {
   insertMissClick: insertMissClick,
   insertCoordination: insertCoordination
-};
+}
